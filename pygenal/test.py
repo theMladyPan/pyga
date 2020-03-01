@@ -49,6 +49,7 @@ if __name__ == '__main__':
     #   fittest didn't change for 200 generations OR
     #   2.5s didn't passes yet
     population.evolve(
+            allowCrossover=True,
             generations=1000,
             verbose=True,
             timeout=Duration(seconds=2, miliseconds=500),

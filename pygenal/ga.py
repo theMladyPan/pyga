@@ -219,6 +219,7 @@ class Population(list):
     def evolve(
             self,
             *,
+            allowCrossover: bool = True,
             timeout: float = 0,
             generations: int = 0,
             verbose: bool = False,
@@ -245,11 +246,16 @@ class Population(list):
             del self[:int(lenOfPop/2)]
 
             for i in range(0, int(lenOfPop/2), 2):
-                # crossover those motherfuckers an mutate
-                offspring = (self[i]@self[i+1]).mutate(chanceOfMutation)
-                self.append(offspring)
-                # mutate few of survivors
-                self.append(random.choice(self).mutate(chanceOfMutation))
+                if allowCrossover:
+                    # crossover those motherfuckers an mutate
+                    offspring = (self[i]@self[i+1]).mutate(chanceOfMutation)
+                    self.append(offspring)
+                    # mutate few of survivors
+                    self.append(random.choice(self).mutate(chanceOfMutation))
+                else:
+                    # mutate few of survivors
+                    self.append(random.choice(self).mutate(chanceOfMutation))
+                    self.append(random.choice(self).mutate(chanceOfMutation))
             chanceOfMutation /= decCoeff
             self.test()
             self.order()
