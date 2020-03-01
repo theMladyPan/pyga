@@ -13,7 +13,7 @@ pip3 install pygenal
 #!/usr/bin/env python3
 
 # import required classes
-from ga import Population, Individual, Gene, geneTypes, Duration
+from pygenal.ga import Population, Individual, Gene, geneTypes, Duration
 import numpy as np
 import time
 
