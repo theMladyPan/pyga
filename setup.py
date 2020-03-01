@@ -5,11 +5,11 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="gapy-theMladyPan",
-    version="0.0.1",
+    name="pygenal",
+    version="1.0.0",
     author="Stanislav Rubint",
     author_email="stanislav@rubint.sk",
-    description="Genetic Algorithm, Python implementation",
+    description="Python implementation of Genetic Algorithm",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/themladypan/pyga",

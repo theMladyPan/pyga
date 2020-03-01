@@ -4,6 +4,7 @@ import time
 import math
 import numpy as np
 import copy
+import random
 
 from enum import Enum
 
@@ -19,6 +20,34 @@ __all__ = [
 __author__ = "Stanislav Rubint"
 __year__ = 2020
 __doc__ = """"""
+
+
+class Duration:
+    def __init__(self, days: int = 0, hours: int = 0, minutes: int = 0, seconds: int = 0, miliseconds: int = 0):
+        self._seconds = days*24*3600 + hours*3600 + minutes*60 + seconds + miliseconds/1000.0
+
+    @property
+    def miliseconds(self):
+        return self._seconds*1000
+
+    @property
+    def seconds(self):
+        return self._seconds
+
+    @property
+    def minutes(self):
+        return self._seconds/60.0
+
+    @property
+    def hours(self):
+        return self.minutes/60.0
+
+    @property
+    def days(self):
+        return self.hours/24.0
+
+    def __float__(self):
+        return self._seconds
 
 
 class geneTypes(Enum):
@@ -191,18 +220,25 @@ class Population(list):
             self,
             *,
             timeout: float = 0,
-            generations: int = 1,
+            generations: int = 0,
             verbose: bool = False,
             terminatingChange: float = 0,
-            terminateAfter: int = 1,
-            maxTime: float = 0
-        ):
+            terminateAfter: int = 0):
+
         # TODO: Timeout
         chanceOfMutation = self.mutRateStart
-        decCoeff = (self.mutRateStart / self.mutRateStop) ** (1.0/generations)
-        generationsWithoutImprovement = 0
 
-        for j in range(generations):
+        if not generations:
+            generations = math.inf
+            decCoeff = (self.mutRateStart / self.mutRateStop) ** 0.1
+        else:
+            decCoeff = (self.mutRateStart / self.mutRateStop) ** (1.0/generations)
+        generationsWithoutImprovement = 0
+        if timeout:
+            startTime = time.time()
+
+        j = 0
+        while j < generations:
             lastFittest = self[-1]
             lenOfPop = len(self)
             # remove tail of population
@@ -212,9 +248,8 @@ class Population(list):
                 # crossover those motherfuckers an mutate
                 offspring = (self[i]@self[i+1]).mutate(chanceOfMutation)
                 self.append(offspring)
-                #self.append((self[np.random.randint(0, lenOfPop/2)]@self[i+1]).mutate(chanceOfMutation))
                 # mutate few of survivors
-                self.append(self[i+1].mutate(chanceOfMutation))
+                self.append(random.choice(self).mutate(chanceOfMutation))
             chanceOfMutation /= decCoeff
             self.test()
             self.order()
@@ -222,11 +257,18 @@ class Population(list):
             improvement = self[-1].score - lastFittest.score
             if improvement <= terminatingChange:
                 generationsWithoutImprovement += 1
-            if generationsWithoutImprovement >= terminateAfter:
+            else:
+                generationsWithoutImprovement = 0
+
+            if terminateAfter and generationsWithoutImprovement >= terminateAfter:
+                break
+            if time.time()-startTime > float(timeout):
                 break
 
             if verbose:
                 print(f"Top score in generation {j} is {self[-1].score}")
+
+            j += 1
 
     def order(self):
         # sort population according to fitness score
@@ -238,3 +280,7 @@ class Population(list):
 
     def __str__(self):
         return str([(i.get("eye_color").value, i.get("height").value) for i in self])
+
+    @property
+    def fittest(self):
+        return self[-1]

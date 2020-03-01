@@ -1,15 +1,3 @@
-# pyga
-Python implementation of Genetic Algorithm
-
-## Installation
-
-```shell
-pip3 install pygenal
-```
-
-## Usage
-
-```python
 #!/usr/bin/env python3
 
 # import required classes
@@ -68,5 +56,3 @@ if __name__ == '__main__':
         )
     print(f"Evolved in {time.time()-tStart}s, precision: {(3.35864+len('chocolate')/10 - population.fittest.score)*100}%")
     print(f"Fittest: {population.fittest}, genes: {repr(population.fittest)}")
-
-```
