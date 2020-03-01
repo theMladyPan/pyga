@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # import required classes
-from pygenal.ga import Population, Individual, Gene, geneTypes, Duration
+from ga import Population, Individual, Gene, geneTypes, Duration
 import numpy as np
 import time
 
@@ -19,6 +19,7 @@ class Polynom(Population):
         # at (x, y) ≈ (1.30084, -1.27413)
         # + favorize chocolate over shorter colors, just for demonstration
         return (x + 3*(x**2) - x**4 - y**6 + y/3.0 - (y**3)*4 - y - 5) + len(color)/10
+
 
 # introduce non-number options such as color, good for selections
 colors = ["brown", "green", "grey", "blue", "chocolate"]
@@ -38,8 +39,8 @@ if __name__ == '__main__':
     population = Polynom(
             species=i1,
             size=100,
-            chanceOfMutationStart=0.5,
-            chanceOfMutationStop=0.01
+            chanceOfMutationStart=0.1,
+            chanceOfMutationStop=0.001
         )
 
     tStart = time.time()
@@ -52,7 +53,7 @@ if __name__ == '__main__':
             allowCrossover=True,
             generations=1000,
             verbose=True,
-            timeout=Duration(seconds=2, miliseconds=500),
+            timeout=Duration(seconds=5, miliseconds=500),
             terminateAfter=200,
         )
     print(f"Evolved in {time.time()-tStart}s, precision: {(3.35864+len('chocolate')/10 - population.fittest.score)*100}%")

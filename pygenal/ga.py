@@ -10,6 +10,7 @@ from enum import Enum
 
 
 __all__ = [
+    "Duration",
     "CustomException",
     "geneTypes",
     "dummy",
@@ -17,9 +18,11 @@ __all__ = [
     "Individual",
     "Population",
     ]
+
 __author__ = "Stanislav Rubint"
 __year__ = 2020
 __doc__ = """"""
+__version__ = "1.0.3"
 
 
 class Duration:
@@ -99,14 +102,14 @@ class Gene:
             # determine span for mutation
             diff = self.max - self.min
             # calculate something in 10% radii of current value
-            delta = diff * ((2 * random) - 1) * 0.1
+            delta = diff * ((2 * random) - 1) * chance
             # mutate a bit
             self.value += delta
             # pay attention to limits
             if self.value < self.min:
-                self.value = self.min
+                self.value -= delta*2
             elif self.value > self.max:
-                self.value = self.max
+                self.value -= delta*2
         return self
 
     def __gt__(self, gene: Gene):
