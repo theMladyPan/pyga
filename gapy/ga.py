@@ -67,9 +67,13 @@ class Gene:
             if chance >= random:
                 self.value = np.random.choice(self.options)
         else:
+            # determine span for mutation
             diff = self.max - self.min
-            delta = diff * ((2 * random) - 1)
+            # calculate something in 10% radii of current value
+            delta = diff * ((2 * random) - 1) * 0.1
+            # mutate a bit
             self.value += delta
+            # pay attention to limits
             if self.value < self.min:
                 self.value = self.min
             elif self.value > self.max:
@@ -97,9 +101,9 @@ class Gene:
 
     def __repr__(self):
         if self.type == geneTypes.VALUE:
-            return f"Gene(uname={self.uname}, type={self.type}, value='{self.value}', dominant={self.dominant}, rateOfMutation={self.rate}, availableOptions={self.options})"
+            return f"Gene(uname='{self.uname}', type={self.type}, value='{self.value}', dominant={self.dominant}, rateOfMutation={self.rate}, availableOptions={self.options})"
         else:
-            return f"Gene(uname={self.uname}, type={self.type}, value={self.value}, dominant={self.dominant}, rateOfMutation={self.rate}, min={self.min}, max={self.max})"
+            return f"Gene(uname='{self.uname}', type={self.type}, value={self.value}, dominant={self.dominant}, rateOfMutation={self.rate}, min={self.min}, max={self.max})"
 
 
 class Individual:
@@ -118,6 +122,14 @@ class Individual(dict):
 
     def appendGene(self, gene):
         self.__iadd__(gene)
+
+    @property
+    def genes(self):
+        return [value for (key, value) in self.items() if not key.startswith("__")]
+
+    @property
+    def score(self):
+        return self.get("__score__")
 
     def __matmul__(self, individual):
         """Perform uniform crossover with other individual"""
@@ -142,11 +154,14 @@ class Individual(dict):
         sRep = {key: value for (key, value) in self.items()}
         return f"Individual(genome={sRep})"
 
+    def __str__(self):
+        return f"Score: {self['__score__']}"
+
     def mutate(self, chance: float) -> Individual:
         mutated = self.copy()
-        for key in self.keys():
+        for key in mutated.keys():
             if not key.startswith("__"):
-                self[key].mutate(chance)
+                mutated[key].mutate(chance)
 
         return mutated
 
@@ -155,33 +170,71 @@ class Individual(dict):
 
 
 class Population(list):
-    def __init__(self, individual: Individual, size: int, chanceOfMutation: float = 0.1):
-        self.species = individual
-        self.chanceOfMutation = chanceOfMutation
-        super().__init__([self.species.mutate(chanceOfMutation) for i in range(size)])
+    def __init__(self, species: Individual, size: int, *, chanceOfMutationStart: float = 0.1, chanceOfMutationStop: float = 0.01, randomSeed: bool = True):
+        self.species = species
+        self.mutRateStart = chanceOfMutationStart
+        self.mutRateStop = chanceOfMutationStop
+        if randomSeed:
+            super().__init__([self.species.mutate(chanceOfMutationStart) for i in range(size)])
+        else:
+            super().__init__([self.species.mutate(chanceOfMutationStart) for i in range(size)])
+        self.test()
+        self.order()
+        print([i.score for i in self])
 
-    def evolve(self, *, timeout: float = 0, iterations: int = 1):
+    def test(self):
+        for individual in self:
+            # evaluate each individual according to fitness function
+            individual["__score__"] = self.fitness(individual)
+
+    def evolve(
+            self,
+            *,
+            timeout: float = 0,
+            generations: int = 1,
+            verbose: bool = False,
+            terminatingChange: float = 0,
+            terminateAfter: int = 1,
+            maxTime: float = 0
+        ):
         # TODO: Timeout
-        for i in range(iterations):
-            for individual in self:
-                # evaluate each individual according to fitness function
-                individual["__score__"] = self.fitness(individual)
+        chanceOfMutation = self.mutRateStart
+        decCoeff = (self.mutRateStart / self.mutRateStop) ** (1.0/generations)
+        generationsWithoutImprovement = 0
 
-            # sort population according to fitness score
-            self.sort(key=lambda individual: individual["__score__"])
+        for j in range(generations):
+            lastFittest = self[-1]
+            lenOfPop = len(self)
             # remove tail of population
-            del self[:int(len(self)/2)]
-            for i in range(0, len(self), 2):
-                # crossover those motherfuckers
-                self.append(self[i]@self[i+1])
-                self.append(self[i]@self[i+1])
-            for individual in self:
-                individual.mutate(self.chanceOfMutation)
+            del self[:int(lenOfPop/2)]
+
+            for i in range(0, int(lenOfPop/2), 2):
+                # crossover those motherfuckers an mutate
+                offspring = (self[i]@self[i+1]).mutate(chanceOfMutation)
+                self.append(offspring)
+                #self.append((self[np.random.randint(0, lenOfPop/2)]@self[i+1]).mutate(chanceOfMutation))
+                # mutate few of survivors
+                self.append(self[i+1].mutate(chanceOfMutation))
+            chanceOfMutation /= decCoeff
+            self.test()
+            self.order()
+
+            improvement = self[-1].score - lastFittest.score
+            if improvement <= terminatingChange:
+                generationsWithoutImprovement += 1
+            if generationsWithoutImprovement >= terminateAfter:
+                break
+
+            if verbose:
+                print(f"Top score in generation {j} is {self[-1].score}")
+
+    def order(self):
+        # sort population according to fitness score
+        self.sort(key=lambda individual: individual["__score__"])
 
     def fitness(self, individual):
         """Override this function with your fitness function"""
-        return len(individual.get("eye_color").value) + individual.get("height").value
-        # raise NotImplementedError("You must override fitness method in order to evolve")
+        raise NotImplementedError("You must override fitness method in order to evolve")
 
     def __str__(self):
         return str([(i.get("eye_color").value, i.get("height").value) for i in self])
