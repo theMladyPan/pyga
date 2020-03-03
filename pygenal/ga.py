@@ -22,7 +22,7 @@ __all__ = [
 __author__ = "Stanislav Rubint"
 __year__ = 2020
 __doc__ = """"""
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 
 
 class Duration:
@@ -110,6 +110,8 @@ class Gene:
                 self.value -= delta*2
             elif self.value > self.max:
                 self.value -= delta*2
+            if self.type == geneTypes.INTEGER:
+                self.value = int(self.value)
         return self
 
     def __gt__(self, gene: Gene):

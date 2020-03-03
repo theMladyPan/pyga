@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pygenal",
-    version="1.0.3",
+    version="1.0.4",
     author="Stanislav Rubint",
     author_email="stanislav@rubint.sk",
     description="Python implementation of Genetic Algorithm",
