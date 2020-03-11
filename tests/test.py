@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # import required classes
-from ga import Population, Individual, Gene, geneTypes, Duration
+from pygenal.ga import Population, Individual, Gene, geneTypes, Duration
 import numpy as np
 import time
 
@@ -54,7 +54,6 @@ if __name__ == '__main__':
             generations=1000,
             verbose=True,
             timeout=Duration(seconds=5, miliseconds=500),
-            terminateAfter=200,
         )
     print(f"Evolved in {time.time()-tStart}s, precision: {(3.35864+len('chocolate')/10 - population.fittest.score)*100}%")
     print(f"Fittest: {population.fittest}, genes: {repr(population.fittest)}")

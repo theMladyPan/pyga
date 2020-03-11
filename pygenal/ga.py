@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from __future__ import annotations
 import time
 import math
 import numpy as np
@@ -22,7 +23,7 @@ __all__ = [
 __author__ = "Stanislav Rubint"
 __year__ = 2020
 __doc__ = """"""
-__version__ = "1.0.4"
+__version__ = "1.0.6"
 
 
 class Duration:
@@ -68,11 +69,6 @@ class CustomException(Exception):
     def __init__(self, message, errors):
         super().__init__(message)
         self.errors = errors
-
-
-class Gene:
-    """Declaration"""
-    pass
 
 
 class Gene:
