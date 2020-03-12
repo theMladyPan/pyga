@@ -23,7 +23,7 @@ __all__ = [
 __author__ = "Stanislav Rubint"
 __year__ = 2020
 __doc__ = """"""
-__version__ = "1.0.6"
+__version__ = "1.0.7"
 
 
 class Duration:
@@ -284,9 +284,6 @@ class Population(list):
     def fitness(self, individual):
         """Override this function with your fitness function"""
         raise NotImplementedError("You must override fitness method in order to evolve")
-
-    def __str__(self):
-        return str([(i.get("eye_color").value, i.get("height").value) for i in self])
 
     @property
     def fittest(self):

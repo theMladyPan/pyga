@@ -9,6 +9,8 @@ pip3 install pygenal
 
 ## Usage
 
+this test is able to find global maximum of 6th order polynom with two variables in 500ms with precision approximately 10<sup>-4</sup> to 10<sup>-5</sup> % (depending on hardware)
+
 ```python
 #!/usr/bin/env python3
 
@@ -32,6 +34,7 @@ class Polynom(Population):
         # + favorize chocolate over shorter colors, just for demonstration
         return (x + 3*(x**2) - x**4 - y**6 + y/3.0 - (y**3)*4 - y - 5) + len(color)/10
 
+
 # introduce non-number options such as color, good for selections
 colors = ["brown", "green", "grey", "blue", "chocolate"]
 
@@ -42,16 +45,16 @@ if __name__ == '__main__':
     i1 = Individual()
 
     # construct "DNA"
-    i1 += Gene("x", geneTypes.REAL, np.random.randint(-3, 3), min=-10, max=10)
-    i1 += Gene("y", geneTypes.REAL, np.random.randint(-3, 3), min=-10, max=10)
+    i1 += Gene("x", geneTypes.REAL, np.random.randint(-10, 10), min=-10, max=10)
+    i1 += Gene("y", geneTypes.REAL, np.random.randint(-10, 10), min=-10, max=10)
     i1 += Gene("color", geneTypes.VALUE, np.random.choice(colors), availableOptions=colors, dominant=True)
 
     # create tribe with size of 100 individuals based on your first Individual
     population = Polynom(
             species=i1,
             size=100,
-            chanceOfMutationStart=0.5,
-            chanceOfMutationStop=0.01
+            chanceOfMutationStart=.5,
+            chanceOfMutationStop=0.0001
         )
 
     tStart = time.time()
@@ -61,12 +64,11 @@ if __name__ == '__main__':
     #   fittest didn't change for 200 generations OR
     #   2.5s didn't passes yet
     population.evolve(
-            generations=1000,
+            allowCrossover=True,
+            generations=100,
             verbose=True,
-            timeout=Duration(seconds=2, miliseconds=500),
-            terminateAfter=200,
+            timeout=Duration(seconds=0, miliseconds=500),
         )
-    print(f"Evolved in {time.time()-tStart}s, precision: {(3.35864+len('chocolate')/10 - population.fittest.score)*100}%")
+    print(f"Evolved in {time.time()-tStart}s, precision: {(4.258642115713602 - population.fittest.score)*100}%")
     print(f"Fittest: {population.fittest}, genes: {repr(population.fittest)}")
-
 ```

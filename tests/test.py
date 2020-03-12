@@ -31,16 +31,16 @@ if __name__ == '__main__':
     i1 = Individual()
 
     # construct "DNA"
-    i1 += Gene("x", geneTypes.REAL, np.random.randint(-3, 3), min=-10, max=10)
-    i1 += Gene("y", geneTypes.REAL, np.random.randint(-3, 3), min=-10, max=10)
+    i1 += Gene("x", geneTypes.REAL, np.random.randint(-10, 10), min=-10, max=10)
+    i1 += Gene("y", geneTypes.REAL, np.random.randint(-10, 10), min=-10, max=10)
     i1 += Gene("color", geneTypes.VALUE, np.random.choice(colors), availableOptions=colors, dominant=True)
 
     # create tribe with size of 100 individuals based on your first Individual
     population = Polynom(
             species=i1,
             size=100,
-            chanceOfMutationStart=0.1,
-            chanceOfMutationStop=0.001
+            chanceOfMutationStart=.5,
+            chanceOfMutationStop=0.0001
         )
 
     tStart = time.time()
@@ -51,9 +51,9 @@ if __name__ == '__main__':
     #   2.5s didn't passes yet
     population.evolve(
             allowCrossover=True,
-            generations=1000,
+            generations=100,
             verbose=True,
-            timeout=Duration(seconds=5, miliseconds=500),
+            timeout=Duration(seconds=0, miliseconds=500),
         )
-    print(f"Evolved in {time.time()-tStart}s, precision: {(3.35864+len('chocolate')/10 - population.fittest.score)*100}%")
+    print(f"Evolved in {time.time()-tStart}s, precision: {(4.258642115713602 - population.fittest.score)*100}%")
     print(f"Fittest: {population.fittest}, genes: {repr(population.fittest)}")
