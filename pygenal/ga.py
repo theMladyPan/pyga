@@ -76,7 +76,7 @@ class Gene:
         super().__init__()
         self.uname = uname
         self.type = type
-        self.dominant = bool(dominant)
+        self.dominant = dominant
         self.rate = rateOfMutation
         self.value = value
         if type == geneTypes.VALUE:
@@ -89,7 +89,7 @@ class Gene:
             self.max = max
 
     def mutate(self, chance: float) -> Gene:
-        chance = chance*self.rate
+        chance *= self.rate
         random = np.random.random()
         if self.type == geneTypes.VALUE:
             if chance >= random:
@@ -102,9 +102,7 @@ class Gene:
             # mutate a bit
             self.value += delta
             # pay attention to limits
-            if self.value < self.min:
-                self.value -= delta*2
-            elif self.value > self.max:
+            if self.value < self.min or self.value > self.max:
                 self.value -= delta*2
             if self.type == geneTypes.INTEGER:
                 self.value = int(self.value)
@@ -112,15 +110,11 @@ class Gene:
 
     def __gt__(self, gene: Gene):
         "Return True if dominant over gene"
-        if self.dominant and not gene.dominant:
-            return True
-        return False
+        return bool(self.dominant and not gene.dominant)
 
     def __lt__(self, gene: Gene):
         "Return True if recessive over gene"
-        if not self.dominant and gene.dominant:
-            return True
-        return False
+        return bool(not self.dominant and gene.dominant)
 
     def __eq__(self, gene: Gene):
         "Return True if genes are equally dominant"
@@ -181,7 +175,7 @@ class Individual(dict):
         self.__matmul__(individual)
 
     def __repr__(self):
-        sRep = {key: value for (key, value) in self.items()}
+        sRep = dict(self.items())
         return f"Individual(genome={sRep})"
 
     def __str__(self):
@@ -204,10 +198,9 @@ class Population(list):
         self.species = species
         self.mutRateStart = chanceOfMutationStart
         self.mutRateStop = chanceOfMutationStop
-        if randomSeed:
-            super().__init__([self.species.mutate(chanceOfMutationStart) for i in range(size)])
-        else:
-            super().__init__([self.species.mutate(chanceOfMutationStart) for i in range(size)])
+        super().__init__(
+            [self.species.mutate(chanceOfMutationStart) for _ in range(size)]
+        )
         self.test()
         self.order()
         print([i.score for i in self])
@@ -244,9 +237,9 @@ class Population(list):
             lastFittest = self[-1]
             lenOfPop = len(self)
             # remove tail of population
-            del self[:int(lenOfPop/2)]
+            del self[:lenOfPop // 2]
 
-            for i in range(0, int(lenOfPop/2), 2):
+            for i in range(0, lenOfPop // 2, 2):
                 if allowCrossover:
                     # crossover those motherfuckers an mutate
                     offspring = (self[i]@self[i+1]).mutate(chanceOfMutation)
@@ -269,7 +262,7 @@ class Population(list):
 
             if terminateAfter and generationsWithoutImprovement >= terminateAfter:
                 break
-            if time.time()-startTime > float(timeout):
+            if time.time() - startTime > timeout:
                 break
 
             if verbose:
